@@ -21,7 +21,7 @@ BtnAdd.addEventListener('click', function() {
     console.log(ElObj.Name)
     appendToList(List, NewDiv)
     CheckListValue()
-    SaveDataToLocalStorage(NewDiv)
+    SaveDataToLocalStorage(ElObj)
 });
 
 function SaveDataToLocalStorage(data) {
@@ -79,6 +79,7 @@ function removeToList() {
     const elements = document.querySelectorAll(".element__wrap")
     elements.forEach(el => {el.remove()});
     CheckListValue()
+    localStorage.removeItem('data'); // Очистка данных в localStorage
 }
 
 function SetListValue(el) {
@@ -113,4 +114,16 @@ BtnTitle.forEach(el => {
         }
         console.log('ListState after:', ListState);
     });
+});
+
+
+window.addEventListener('load', function() {
+    const storedData = JSON.parse(localStorage.getItem('data')) || [];
+    storedData.forEach(data => {
+        const NewDiv = ElementDivCreate(data);
+        const List = getListById(data.Name);
+        appendToList(List, NewDiv);
+    });
+    CheckListValue();
+    console.log('Data loaded from localStorage:', storedData);
 });
