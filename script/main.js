@@ -1,23 +1,35 @@
 
-document.addEventListener('DOMContentLoaded', function() {
-// получаем все нужные элементы
-
 const ElInputName = document.querySelector('.action__input-name');
 const ElInputVacancy = document.querySelector('.action__input-vacancy');
 const ElInputNumber = document.querySelector('.action__input-number');
 const BtnAdd = document.querySelector('.action__btn-add');
 const BtnClear = document.querySelector('.action__btn-clear');
 const BtnTitle = document.querySelectorAll('.list__column-el');
+const ListValue = document.querySelectorAll('.value');
 let ListState = 0
 
 // добавляем обработчик события на кнопку
+
+function CheckListValue() { 
+    BtnTitle.forEach(el => { SetListValue(el); }); // Обновляем значение после удаления всех элементов
+}
 
 BtnAdd.addEventListener('click', function() {
     const ElObj = ElObjectCreate();
     const NewDiv = ElementDivCreate(ElObj)
     const List = getListById(ElObj.Name)
+    console.log(ElObj.Name)
     appendToList(List, NewDiv)
+    CheckListValue()
+    SaveDataToLocalStorage(NewDiv)
 });
+
+function SaveDataToLocalStorage(data) {
+    const storedData = JSON.parse(localStorage.getItem('data')) || []
+    storedData.push(data)
+    localStorage.setItem('data', JSON.stringify(storedData))
+    console.log('Data saved to localStorage:', storedData);
+}
 
 function ElObjectCreate() {
     const ElObject = {};
@@ -36,7 +48,7 @@ function ElObjectCreate() {
 function ElementDivCreate(data) {
 
     const NewDiv = document.createElement('div');
-    NewDiv.className = 'element__wrap';
+    NewDiv.classList.add('element__wrap', 'unvisible');
 
     const NewElName = document.createElement('p');
     const NewElVacancy = document.createElement('p');
@@ -66,32 +78,39 @@ BtnClear.addEventListener('click', function() {
 function removeToList() {
     const elements = document.querySelectorAll(".element__wrap")
     elements.forEach(el => {el.remove()});
+    CheckListValue()
 }
 
-for (const el of BtnTitle) {
+function SetListValue(el) {
+    const Value = el.querySelector('.value');
+    if (el.children.length <= 1) {
+        Value.textContent = null
+    } else {
+        Value.textContent = el.children.length - 1
+    }
+}
+
+BtnTitle.forEach(el => {
     el.addEventListener('click', function() {
-        // BtnActive(ElementDivCreate)
-        console.log(ListState)
+        // console.log('ListState before:', ListState);
 
-        // if(ListState == 0) {
-        //     // Добавляем класс active к элементу
-        //     el.firstElementChild.classList.add('active');
-        //     ListState = 1; // Переключаем состояние
-        //     console.log(ListState)
-        // } else {
-        //     el.child.classList.remove('active');
-        //     ListState = 0;
-        // }
+        if (ListState === 0) {
+            const children = el.querySelectorAll(':scope > .element__wrap');
+            children.forEach(child => {
+                // console.log('Removing class "unvisible" from:', child);
+                child.classList.remove('unvisible');
+            });
+            ListState = 1;
+            SetListValue(el)
+        } else {
+            const children = el.querySelectorAll(':scope > .element__wrap');
+            children.forEach(child => {
+                // console.log('Adding class "unvisible" to:', child);
+                child.classList.add('unvisible');
+            });
+            ListState = 0;
+            SetListValue(el)
+        }
+        console.log('ListState after:', ListState);
     });
-}
-
-// function BtnActive(data) {
-//     let ListState = 0
-//     if(!ListState) {
-//         data.classList.add('active');
-//     } else {
-//         data.classList.remove('active');
-//     }
-// }
-
 });
