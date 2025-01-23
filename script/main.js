@@ -45,7 +45,7 @@ function ElObjectCreate() {
 }
 
 function ElementDivCreate(data) {
-    
+
     if (!data || !data.Name || !data.Vacancy || !data.Number) {
         console.error('Invalid data:', data);
         return null;
@@ -58,15 +58,11 @@ function ElementDivCreate(data) {
     const NewElVacancy = document.createElement('p');
     const NewElNumber = document.createElement('p');
 
-    const BtnEdit = document.createElement('button');
-    BtnEdit.classList.add('button');
-    BtnEdit.textContent = 'Edit';
-
     NewElName.textContent = `Name: ${data.Name}`;
     NewElVacancy.textContent = `Vacancy: ${data.Vacancy}`;
     NewElNumber.textContent = `Number: ${data.Number}`;
 
-    NewDiv.append(NewElName, NewElVacancy, NewElNumber, addBtnDel(), BtnEdit);
+    NewDiv.append(NewElName, NewElVacancy, NewElNumber, addBtnDel(), addBtnEdit(NewElName, NewElVacancy, NewElNumber));
     return NewDiv;
 }
 
@@ -78,9 +74,72 @@ function addBtnDel() {
     BtnDel.addEventListener('click', function() {
         BtnDel.parentElement.remove();
         CheckListValue();
+        SaveDataToLocalStorage();
     });
 
     return BtnDel;
+}
+
+function RemoveDataFromLocalStorage(data) {
+    const storedData = JSON.parse(localStorage.getItem('data')) || [];
+    const updatedData = storedData.filter(item => item.Name !== data.Name || item.Vacancy !== data.Vacancy || item.Number !== data.Number);
+    localStorage.setItem('data', JSON.stringify(updatedData));
+    console.log('Data removed from localStorage:', data);
+}
+
+function addBtnEdit(NewElName, NewElVacancy, NewElNumber) {
+    const BtnEdit = document.createElement('button');
+    BtnEdit.classList.add('button');
+    BtnEdit.textContent = 'Edit';
+
+    BtnEdit.addEventListener('click', function() {
+        console.log('BtnEdit clicked')
+        const EditWindow = document.createElement('div');
+        EditWindow.classList.add('element__edit');
+        
+        const EditWindowTitle = document.createElement('p');
+        const EditWindowName = document.createElement('input');
+        const EditWindowVacancy = document.createElement('input');
+        const EditWindowNum = document.createElement('input');
+        const BtnSave = document.createElement('button');
+
+        EditWindowTitle.textContent = 'Edit element';
+        EditWindowName.value = NewElName.textContent.replace('Name: ', '');
+        EditWindowVacancy.value = NewElVacancy.textContent.replace('Vacancy: ', '');
+        EditWindowNum.value = NewElNumber.textContent.replace('Number: ', '');
+
+        EditWindowName.classList.add('element__edit-input');
+        EditWindowVacancy.classList.add('element__edit-input');
+        EditWindowNum.classList.add('element__edit-input');
+
+        BtnSave.classList.add('button');
+        BtnSave.textContent = 'Save';
+
+        EditWindow.append(EditWindowTitle, EditWindowName, EditWindowVacancy, EditWindowNum, BtnSave);
+
+        document.body.appendChild(EditWindow);
+
+        BtnSave.addEventListener('click', function() {
+            // Обновление текста элементов
+            NewElName.textContent = `Name: ${EditWindowName.value}`;
+            NewElVacancy.textContent = `Vacancy: ${EditWindowVacancy.value}`;
+            NewElNumber.textContent = `Number: ${EditWindowNum.value}`;
+            EditWindow.classList.remove('element__edit');
+
+            // Обновление данных в localStorage
+            const updatedData = {
+                Name: EditWindowName.value,
+                Vacancy: EditWindowVacancy.value,
+                Number: EditWindowNum.value
+            };
+            UpdateDataInLocalStorage(updatedData);
+
+            // Удаление окна редактирования
+            document.body.removeChild(EditWindow);
+        });
+    });
+
+    return BtnEdit;
 }
 
 function getListById(name) {

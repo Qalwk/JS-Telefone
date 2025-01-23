@@ -115,7 +115,7 @@ p {
     justify-content: start;
     align-items: center;
     /* width: 100%; */
-    height: 100%;
+    /* height: 100%; */
 }
 
 .list__column-title {
@@ -143,4 +143,29 @@ p {
 
 .active {
     display: none;
+}
+
+.element__edit {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20rem;
+    height: 20rem;
+    padding: 1.5rem 1.5rem;
+    justify-content: space-between;
+    background-color: var(--grey-color);
+    z-index: 100;
+}
+
+.element__edit-input {
+    width: 12rem;
+    height: 2rem;
+    border: solid var(--primary-color) 1px;
+    border-radius: 0.5rem;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
 }
