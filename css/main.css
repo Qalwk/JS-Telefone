@@ -77,9 +77,18 @@
     color: var(--white-color);
 }
 
+.btn__delete {
+    background-color: var(--third-color);
+}
+
 .button:active {
     background-color: var(--white-color);
     color: var(--secondary-color);
+}
+
+.btn__delete:active {
+    background-color: var(--white-color);
+    color: var(--third-color);
 }
 
 .list {
