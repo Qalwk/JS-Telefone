@@ -57,9 +57,15 @@
     padding-left: 1rem;
 }
 
+.error {
+    border: solid var(--third-color) 1px;
+    color: var(--third-color);
+}
+
 .input:focus{
     background-color: var(--white-color);
-    border: solid var(--primary-color) 1px; 
+    color: var(--black-color);
+    /* border: solid var(--primary-color) 1px;  */
 }
 
 .action__btn {

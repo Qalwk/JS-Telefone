@@ -32,16 +32,57 @@ function SaveDataToLocalStorage(data) {
 
 function ElObjectCreate() {
     const ElObject = {};
-    ElObject.Name = ElInputName.value;
-    ElObject.Vacancy = ElInputVacancy.value;
-    ElObject.Number = ElInputNumber.value;
 
-    // Очистка полей после создания объекта
-    ElInputName.value = '';
-    ElInputVacancy.value = '';
-    ElInputNumber.value = '';
+    const isValid = TextValidate(ElInputName.value, ElInputVacancy.value, ElInputNumber.value);
+
+    if (isValid) {
+        ElObject.Name = ElInputName.value;
+        ElObject.Vacancy = ElInputVacancy.value;
+        ElObject.Number = ElInputNumber.value;
+
+        // Очистка полей после создания объекта
+        ElInputName.value = '';
+        ElInputVacancy.value = '';
+        ElInputNumber.value = '';
+    } else {
+        // Обработка случая, когда данные не прошли валидацию
+        console.log('Данные не прошли валидацию');
+    }
 
     return ElObject;
+}
+
+function TextValidate(Name, Vacancy, Number) {
+    let RightState = true;
+
+    const patternABC = /^[a-zA-Z]+$/; // Проверка на содержание только букв
+    const patternNUM = /^[+]?[0-9]+$/; // Проверка на содержание только цифр с возможным плюсом в начале
+
+    // Проверка имени
+    if (Name === "" || !patternABC.test(Name)) {
+        ElInputName.classList.add('error');
+        RightState = false;
+    } else {
+        ElInputName.classList.remove('error');
+    }
+
+    // Проверка вакансии
+    if (Vacancy === "" || !patternABC.test(Vacancy)) {
+        ElInputVacancy.classList.add('error');
+        RightState = false;
+    } else {
+        ElInputVacancy.classList.remove('error');
+    }
+
+    // Проверка номера
+    if (Number === "" || !patternNUM.test(Number)) {
+        ElInputNumber.classList.add('error');
+        RightState = false;
+    } else {
+        ElInputNumber.classList.remove('error');
+    }
+
+    return RightState;
 }
 
 function ElementDivCreate(data) {
