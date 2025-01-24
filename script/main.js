@@ -6,6 +6,7 @@ const BtnClear = document.querySelector('.action__btn-clear');
 const BtnTitle = document.querySelectorAll('.list__column-el');
 const ListValue = document.querySelectorAll('.value');
 let ListState = 0;
+let myData = JSON.parse(localStorage.getItem('data')) || [];
 
 // добавляем обработчик события на кнопку
 
@@ -20,15 +21,35 @@ BtnAdd.addEventListener('click', function() {
     console.log(ElObj.Name);
     appendToList(List, NewDiv);
     CheckListValue();
-    SaveDataToLocalStorage(ElObj);
+    SaveToLocalStorage(ElObj);
 });
 
-function SaveDataToLocalStorage(data) {
-    const storedData = JSON.parse(localStorage.getItem('data')) || [];
-    storedData.push(data);
-    localStorage.setItem('data', JSON.stringify(storedData));
-    console.log('Data saved to localStorage:', storedData);
+function saveToLS(key, data) {
+    const jsonData = JSON.stringify(data);
+    localStorage.setItem(key, jsonData);
 }
+
+function SaveToLocalStorage(data) {
+    myData.push(data);
+    saveToLS('myData', myData);
+}
+
+function deleteItem(id) {
+    myData = myData.filter(item => item.id !== id);
+    saveToLS('data', myData);
+}
+
+function editItem(id, updatedItem) {
+    myData = myData.map(item => item.id === id ? updatedItem : item);
+    saveToLS('data', myData);
+}
+
+// function SaveToLocalStorage(data) {
+//     const storedData = JSON.parse(localStorage.getItem('data')) || [];
+//     storedData.push(data);
+//     localStorage.setItem('data', JSON.stringify(storedData));
+//     console.log('Data saved to localStorage:', storedData);
+// }
 
 function ElObjectCreate() {
     const ElObject = {};
@@ -46,7 +67,7 @@ function ElObjectCreate() {
         ElInputNumber.value = '';
     } else {
         // Обработка случая, когда данные не прошли валидацию
-        console.log('Данные не прошли валидацию');
+        alert('Данные не прошли валидацию');
     }
 
     return ElObject;
@@ -87,10 +108,10 @@ function TextValidate(Name, Vacancy, Number) {
 
 function ElementDivCreate(data) {
 
-    if (!data || !data.Name || !data.Vacancy || !data.Number) {
-        console.error('Invalid data:', data);
-        return null;
-    }
+    // if (!data || !data.Name || !data.Vacancy || !data.Number) {
+    //     console.error('Invalid data:', data);
+    //     return null;
+    // }
 
     const NewDiv = document.createElement('div');
     NewDiv.classList.add('element__wrap', 'unvisible');
@@ -99,15 +120,16 @@ function ElementDivCreate(data) {
     const NewElVacancy = document.createElement('p');
     const NewElNumber = document.createElement('p');
 
+    // console.log(data)
     NewElName.textContent = `Name: ${data.Name}`;
     NewElVacancy.textContent = `Vacancy: ${data.Vacancy}`;
     NewElNumber.textContent = `Number: ${data.Number}`;
 
-    NewDiv.append(NewElName, NewElVacancy, NewElNumber, addBtnDel(), addBtnEdit(NewElName, NewElVacancy, NewElNumber));
+    NewDiv.append(NewElName, NewElVacancy, NewElNumber, addBtnDel(NewDiv), addBtnEdit(NewElName, NewElVacancy, NewElNumber));
     return NewDiv;
 }
 
-function addBtnDel() {
+function addBtnDel(data) {
     const BtnDel = document.createElement('button');
     BtnDel.classList.add('button', 'btn__delete');
     BtnDel.textContent = 'Del';
@@ -115,18 +137,20 @@ function addBtnDel() {
     BtnDel.addEventListener('click', function() {
         BtnDel.parentElement.remove();
         CheckListValue();
-        SaveDataToLocalStorage();
+        console.log(data);
+        
+        SaveToLocalStorage(data);
     });
 
     return BtnDel;
 }
 
-function RemoveDataFromLocalStorage(data) {
-    const storedData = JSON.parse(localStorage.getItem('data')) || [];
-    const updatedData = storedData.filter(item => item.Name !== data.Name || item.Vacancy !== data.Vacancy || item.Number !== data.Number);
-    localStorage.setItem('data', JSON.stringify(updatedData));
-    console.log('Data removed from localStorage:', data);
-}
+// function RemoveDataFromLocalStorage(data) {
+//     const storedData = JSON.parse(localStorage.getItem('data')) || [];
+//     const updatedData = storedData.filter(item => item.Name !== data.Name || item.Vacancy !== data.Vacancy || item.Number !== data.Number);
+//     localStorage.setItem('data', JSON.stringify(updatedData));
+//     console.log('Data removed from localStorage:', data);
+// }
 
 function addBtnEdit(NewElName, NewElVacancy, NewElNumber) {
     const BtnEdit = document.createElement('button');
@@ -168,12 +192,12 @@ function addBtnEdit(NewElName, NewElVacancy, NewElNumber) {
             EditWindow.classList.remove('element__edit');
 
             // Обновление данных в localStorage
-            const updatedData = {
-                Name: EditWindowName.value,
-                Vacancy: EditWindowVacancy.value,
-                Number: EditWindowNum.value
-            };
-            UpdateDataInLocalStorage(updatedData);
+            // const updatedData = {
+            //     Name: EditWindowName.value,
+            //     Vacancy: EditWindowVacancy.value,
+            //     Number: EditWindowNum.value
+            // };
+            // UpdateDataInLocalStorage(updatedData);
 
             // Удаление окна редактирования
             document.body.removeChild(EditWindow);
@@ -236,14 +260,15 @@ BtnTitle.forEach(el => {
 });
 
 window.addEventListener('load', function() {
-    const storedData = JSON.parse(localStorage.getItem('data')) || [];
-    storedData.forEach(data => {
+    myData.forEach(data => {
         const NewDiv = ElementDivCreate(data);
+        // console.log(NewDiv);
         if (NewDiv) {
+            console.log(myData);
             const List = getListById(data.Name);
             appendToList(List, NewDiv);
         }
     });
     CheckListValue();
-    console.log('Data loaded from localStorage:', storedData);
+    console.log('Data loaded from localStorage:', myData);
 });
