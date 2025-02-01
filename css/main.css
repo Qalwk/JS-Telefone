@@ -175,3 +175,39 @@ p {
     padding-left: 1rem;
     margin-bottom: 1rem;
 }
+
+.element__search {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 25rem;
+    height: 25rem;
+    padding: 1.5rem 1.5rem;
+    justify-content: space-between;
+    background-color: var(--light-grey-color);
+    z-index: 100;
+}
+
+.element__search-input {
+    width: 100%;
+    height: 2rem;
+    border: solid var(--primary-color) 1px;
+    border-radius: 0.5rem;
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.element__search-wrap {
+    width: 100%;
+    height: 12rem;
+    overflow-y: auto;
+    background-color: var(--grey-color);
+}
+
+.element__search-btnExit {
+    background-color: var(--third-color);
+}

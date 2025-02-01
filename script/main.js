@@ -3,6 +3,7 @@ const ElInputVacancy = document.querySelector('.action__input-vacancy');
 const ElInputNumber = document.querySelector('.action__input-number');
 const BtnAdd = document.querySelector('.action__btn-add');
 const BtnClear = document.querySelector('.action__btn-clear');
+const BtnSearch = document.querySelector('.action__btn-search');
 const BtnTitle = document.querySelectorAll('.list__column-el');
 const ListValue = document.querySelectorAll('.value');
 let ListState = 0;
@@ -18,6 +19,7 @@ BtnAdd.addEventListener('click', function() {
     if (ElObj.Name && ElObj.Vacancy && ElObj.Number) {
         const NewDiv = ElementDivCreate(ElObj);
         const List = getListById(ElObj.Name);
+
         appendToList(List, NewDiv);
         CheckListValue();
         SaveToLocalStorage(ElObj);
@@ -123,6 +125,7 @@ function addBtnDel(data) {
         BtnDel.parentElement.remove();
         CheckListValue()
         deleteItem(data.id);
+        location.reload();
     });
 
     return BtnDel;
@@ -185,7 +188,8 @@ function addBtnEdit(NewElName, NewElVacancy, NewElNumber, data) {
 }
 
 function getListById(name) {
-    let ElId = name.charAt(0);
+    let ElIdDefault = name.charAt(0);
+    let ElId = ElIdDefault.toLowerCase();
     return document.getElementById(ElId);
 }
 
@@ -232,6 +236,76 @@ BtnTitle.forEach(el => {
             SetListValue(el);
         }
         console.log('ListState after:', ListState);
+    });
+});
+
+BtnSearch.addEventListener('click', function () {
+    console.log('BtnSearch clicked');
+
+    // Создаем элементы для окна поиска
+    const SearchWindow = document.createElement('div');
+    SearchWindow.classList.add('element__search');
+
+    const SearchWindowExit = document.createElement('button');
+    const SearchWindowTitle = document.createElement('p');
+    const SearchWindowInput = document.createElement('input');
+    const SearchWindowList = document.createElement('div');
+    const SearchWindowBtn = document.createElement('button');
+
+    // Настройка текста и классов для элементов
+    SearchWindowExit.textContent = 'Close';
+    SearchWindowTitle.textContent = 'Search contact';
+    SearchWindowBtn.textContent = 'Show all';
+    SearchWindowInput.placeholder = 'Search';
+
+    SearchWindowTitle.classList.add('element__search-title');
+    SearchWindowInput.classList.add('element__search-input');
+    SearchWindowList.classList.add('element__search-wrap');
+    SearchWindowBtn.classList.add('element__search-btn', 'button');
+    SearchWindowExit.classList.add('element__search-btnExit', 'button');
+
+    // Добавляем элементы в SearchWindow
+    SearchWindow.append(SearchWindowExit, SearchWindowTitle, SearchWindowInput, SearchWindowList, SearchWindowBtn);
+
+    // Добавляем SearchWindow в body
+    document.body.appendChild(SearchWindow);
+
+    // Обработчик для закрытия окна поиска
+    SearchWindowExit.addEventListener('click', function () {
+        SearchWindow.remove();
+    });
+
+    // Добавляем все элементы из myData в SearchWindowList
+    myData.forEach(data => {
+        const NewDiv = ElementDivCreate(data);
+        if (NewDiv) {
+            SearchWindowList.appendChild(NewDiv);
+        }
+    });
+
+    SearchWindowBtn.addEventListener('click', function() {
+        const elements = SearchWindowList.querySelectorAll('.element__wrap');
+
+        elements.forEach(el => {
+            const name = el.querySelector('p').textContent.toLowerCase();
+            el.style.display = 'block';
+
+        });
+    })
+
+    // Обработчик для поиска
+    SearchWindowInput.addEventListener('input', function () {
+        const searchText = SearchWindowInput.value.toLowerCase();
+        const elements = SearchWindowList.querySelectorAll('.element__wrap');
+
+        elements.forEach(el => {
+            const name = el.querySelector('p').textContent.toLowerCase();
+            if (name.includes(searchText)) {
+                el.style.display = 'block';
+            } else {
+                el.style.display = 'none';
+            }
+        });
     });
 });
 
