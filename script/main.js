@@ -6,22 +6,22 @@ const BtnClear = document.querySelector('.action__btn-clear');
 const BtnTitle = document.querySelectorAll('.list__column-el');
 const ListValue = document.querySelectorAll('.value');
 let ListState = 0;
-let myData = JSON.parse(localStorage.getItem('data')) || [];
+let myData = JSON.parse(localStorage.getItem('myData')) || [];
 
-// добавляем обработчик события на кнопку
 
 function CheckListValue() {
-    BtnTitle.forEach(el => { SetListValue(el); }); // Обновляем значение после удаления всех элементов
+    BtnTitle.forEach(el => { SetListValue(el); }); 
 }
 
 BtnAdd.addEventListener('click', function() {
     const ElObj = ElObjectCreate();
-    const NewDiv = ElementDivCreate(ElObj);
-    const List = getListById(ElObj.Name);
-    console.log(ElObj.Name);
-    appendToList(List, NewDiv);
-    CheckListValue();
-    SaveToLocalStorage(ElObj);
+    if (ElObj.Name && ElObj.Vacancy && ElObj.Number) {
+        const NewDiv = ElementDivCreate(ElObj);
+        const List = getListById(ElObj.Name);
+        appendToList(List, NewDiv);
+        CheckListValue();
+        SaveToLocalStorage(ElObj);
+    }
 });
 
 function saveToLS(key, data) {
@@ -36,20 +36,13 @@ function SaveToLocalStorage(data) {
 
 function deleteItem(id) {
     myData = myData.filter(item => item.id !== id);
-    saveToLS('data', myData);
+    saveToLS('myData', myData);
 }
 
 function editItem(id, updatedItem) {
     myData = myData.map(item => item.id === id ? updatedItem : item);
-    saveToLS('data', myData);
+    saveToLS('myData', myData);
 }
-
-// function SaveToLocalStorage(data) {
-//     const storedData = JSON.parse(localStorage.getItem('data')) || [];
-//     storedData.push(data);
-//     localStorage.setItem('data', JSON.stringify(storedData));
-//     console.log('Data saved to localStorage:', storedData);
-// }
 
 function ElObjectCreate() {
     const ElObject = {};
@@ -57,17 +50,14 @@ function ElObjectCreate() {
     const isValid = TextValidate(ElInputName.value, ElInputVacancy.value, ElInputNumber.value);
 
     if (isValid) {
+        ElObject.id = Date.now(); 
         ElObject.Name = ElInputName.value;
         ElObject.Vacancy = ElInputVacancy.value;
         ElObject.Number = ElInputNumber.value;
 
-        // Очистка полей после создания объекта
         ElInputName.value = '';
         ElInputVacancy.value = '';
         ElInputNumber.value = '';
-    } else {
-        // Обработка случая, когда данные не прошли валидацию
-        alert('Данные не прошли валидацию');
     }
 
     return ElObject;
@@ -76,10 +66,9 @@ function ElObjectCreate() {
 function TextValidate(Name, Vacancy, Number) {
     let RightState = true;
 
-    const patternABC = /^[a-zA-Z]+$/; // Проверка на содержание только букв
-    const patternNUM = /^[+]?[0-9]+$/; // Проверка на содержание только цифр с возможным плюсом в начале
+    const patternABC = /^[a-zA-Z]+$/; 
+    const patternNUM = /^[+]?[0-9]+$/; 
 
-    // Проверка имени
     if (Name === "" || !patternABC.test(Name)) {
         ElInputName.classList.add('error');
         RightState = false;
@@ -87,7 +76,6 @@ function TextValidate(Name, Vacancy, Number) {
         ElInputName.classList.remove('error');
     }
 
-    // Проверка вакансии
     if (Vacancy === "" || !patternABC.test(Vacancy)) {
         ElInputVacancy.classList.add('error');
         RightState = false;
@@ -95,7 +83,6 @@ function TextValidate(Name, Vacancy, Number) {
         ElInputVacancy.classList.remove('error');
     }
 
-    // Проверка номера
     if (Number === "" || !patternNUM.test(Number)) {
         ElInputNumber.classList.add('error');
         RightState = false;
@@ -107,11 +94,10 @@ function TextValidate(Name, Vacancy, Number) {
 }
 
 function ElementDivCreate(data) {
-
-    // if (!data || !data.Name || !data.Vacancy || !data.Number) {
-    //     console.error('Invalid data:', data);
-    //     return null;
-    // }
+    if (!data || !data.Name || !data.Vacancy || !data.Number) {
+        console.error('Invalid data:', data);
+        return null;
+    }
 
     const NewDiv = document.createElement('div');
     NewDiv.classList.add('element__wrap', 'unvisible');
@@ -120,12 +106,11 @@ function ElementDivCreate(data) {
     const NewElVacancy = document.createElement('p');
     const NewElNumber = document.createElement('p');
 
-    // console.log(data)
     NewElName.textContent = `Name: ${data.Name}`;
     NewElVacancy.textContent = `Vacancy: ${data.Vacancy}`;
     NewElNumber.textContent = `Number: ${data.Number}`;
 
-    NewDiv.append(NewElName, NewElVacancy, NewElNumber, addBtnDel(NewDiv), addBtnEdit(NewElName, NewElVacancy, NewElNumber));
+    NewDiv.append(NewElName, NewElVacancy, NewElNumber, addBtnDel(data), addBtnEdit(NewElName, NewElVacancy, NewElNumber, data));
     return NewDiv;
 }
 
@@ -136,32 +121,23 @@ function addBtnDel(data) {
 
     BtnDel.addEventListener('click', function() {
         BtnDel.parentElement.remove();
-        CheckListValue();
-        console.log(data);
-        
-        SaveToLocalStorage(data);
+        CheckListValue()
+        deleteItem(data.id);
     });
 
     return BtnDel;
 }
 
-// function RemoveDataFromLocalStorage(data) {
-//     const storedData = JSON.parse(localStorage.getItem('data')) || [];
-//     const updatedData = storedData.filter(item => item.Name !== data.Name || item.Vacancy !== data.Vacancy || item.Number !== data.Number);
-//     localStorage.setItem('data', JSON.stringify(updatedData));
-//     console.log('Data removed from localStorage:', data);
-// }
-
-function addBtnEdit(NewElName, NewElVacancy, NewElNumber) {
+function addBtnEdit(NewElName, NewElVacancy, NewElNumber, data) {
     const BtnEdit = document.createElement('button');
     BtnEdit.classList.add('button');
     BtnEdit.textContent = 'Edit';
 
     BtnEdit.addEventListener('click', function() {
-        console.log('BtnEdit clicked')
+        console.log('BtnEdit clicked');
         const EditWindow = document.createElement('div');
         EditWindow.classList.add('element__edit');
-        
+
         const EditWindowTitle = document.createElement('p');
         const EditWindowName = document.createElement('input');
         const EditWindowVacancy = document.createElement('input');
@@ -185,22 +161,23 @@ function addBtnEdit(NewElName, NewElVacancy, NewElNumber) {
         document.body.appendChild(EditWindow);
 
         BtnSave.addEventListener('click', function() {
-            // Обновление текста элементов
             NewElName.textContent = `Name: ${EditWindowName.value}`;
             NewElVacancy.textContent = `Vacancy: ${EditWindowVacancy.value}`;
             NewElNumber.textContent = `Number: ${EditWindowNum.value}`;
             EditWindow.classList.remove('element__edit');
 
-            // Обновление данных в localStorage
-            // const updatedData = {
-            //     Name: EditWindowName.value,
-            //     Vacancy: EditWindowVacancy.value,
-            //     Number: EditWindowNum.value
-            // };
-            // UpdateDataInLocalStorage(updatedData);
+            const updatedData = {
+                id: data.id,
+                Name: EditWindowName.value,
+                Vacancy: EditWindowVacancy.value,
+                Number: EditWindowNum.value
+            };
 
-            // Удаление окна редактирования
+            editItem(data.id, updatedData);
+            
+
             document.body.removeChild(EditWindow);
+            location.reload();
         });
     });
 
@@ -224,7 +201,7 @@ function removeToList() {
     const elements = document.querySelectorAll(".element__wrap");
     elements.forEach(el => { el.remove(); });
     CheckListValue();
-    localStorage.removeItem('data'); // Очистка данных в localStorage
+    localStorage.removeItem('myData'); 
 }
 
 function SetListValue(el) {
@@ -238,7 +215,6 @@ function SetListValue(el) {
 
 BtnTitle.forEach(el => {
     el.firstChild.addEventListener('click', function() {
-        console.log(el.parentElement);
 
         if (ListState === 0) {
             const children = el.querySelectorAll(':scope > .element__wrap');
@@ -259,16 +235,14 @@ BtnTitle.forEach(el => {
     });
 });
 
-window.addEventListener('load', function() {
+document.addEventListener("DOMContentLoaded", () => {
     myData.forEach(data => {
         const NewDiv = ElementDivCreate(data);
-        // console.log(NewDiv);
         if (NewDiv) {
-            console.log(myData);
             const List = getListById(data.Name);
             appendToList(List, NewDiv);
         }
     });
     CheckListValue();
     console.log('Data loaded from localStorage:', myData);
-});
+})
