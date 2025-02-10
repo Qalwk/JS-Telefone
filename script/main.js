@@ -6,30 +6,11 @@ const btnClear = document.querySelector('.action__btn-clear');
 const btnTitle = document.querySelectorAll('.list__column-el');
 const listValue = document.querySelectorAll('.value');
 import { PATTERN_ABC, PATTERN_NUM } from './constants.js';
+import { addItem, deleteItem, editItem } from './storage.js';
 let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
 
 function checkListValue() {
     btnTitle.forEach(el => { setValue(el); }); 
-}
-
-function saveToLS(key, data) {
-    const jsonData = JSON.stringify(data);
-    localStorage.setItem(key, jsonData);
-}
-
-function addItem(data) {
-    contacts.push(data);
-    saveToLS('contacts', contacts);
-}
-
-function deleteItem(id) {
-    contacts = contacts.filter(item => item.id !== id);
-    saveToLS('contacts', contacts);
-}
-
-function editItem(id, updatedItem) {
-    contacts = contacts.map(item => item.id === id ? updatedItem : item);
-    saveToLS('contacts', contacts);
 }
 
 function contactObjectCreate() {
