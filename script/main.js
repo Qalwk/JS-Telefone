@@ -33,57 +33,60 @@ function editItem(id, updatedItem) {
 }
 
 function contactObjectCreate() {
-    const contactObject = {};
-    const elInputInfo = {
-        Name: elInputName.value,
-        Vacancy: elInputVacancy.value,
-        Number: elInputNumber.value
-    };
-
+    const elInputInfo = getInputInfo()
     const isValid = textValidate(elInputInfo);
-
     if(!isValid) return null;
 
-    contactObject.id = Date.now();
-    contactObject.Name = elInputName.value;
-    contactObject.Vacancy = elInputVacancy.value;
-    contactObject.Number = elInputNumber.value;
-
-    elInputName.value = '';
-    elInputVacancy.value = '';
-    elInputNumber.value = '';
-
-    console.log(contactObject);
-    
+    const contactObject = setContactObjectInfo(elInputInfo);
+    delInputValue()
 
     return contactObject;
 }
 
+function getInputInfo() {
+    return {
+        Name: elInputName.value,
+        Vacancy: elInputVacancy.value,
+        Number: elInputNumber.value
+    }
+}
+
+function setContactObjectInfo(inputData) {
+    return {
+        id: Date.now(),
+        Name: inputData.Name,
+        Vacancy: inputData.Vacancy,
+        Number: inputData.Number,
+    }
+}
+
+function delInputValue() {
+    elInputName.value = '';
+    elInputVacancy.value = '';
+    elInputNumber.value = '';
+}
+
 function textValidate(elInputInfo) {
     let rightState = true;
+    
+    rightState = validateEl(elInputName, elInputInfo.Name, PATTERN_ABC) && rightState;
 
-    if (elInputInfo.Name === "" || !PATTERN_ABC.test(elInputInfo.Name)) {
-        elInputName.classList.add('error');
-        rightState = false;
-    } else {
-        elInputName.classList.remove('error');
-    }
+    rightState = validateEl(elInputVacancy, elInputInfo.Vacancy, PATTERN_ABC) && rightState;
 
-    if (elInputInfo.Vacancy === "" || !PATTERN_ABC.test(elInputInfo.Vacancy)) {
-        elInputVacancy.classList.add('error');
-        rightState = false;
-    } else {
-        elInputVacancy.classList.remove('error');
-    }
-
-    if (elInputInfo.Number === "" || !PATTERN_NUM.test(elInputInfo.Number) || elInputInfo.Number.length !== 12 || elInputInfo.Number[0] != "+") {
-        elInputNumber.classList.add('error');
-        rightState = false;
-    } else {
-        elInputNumber.classList.remove('error');
-    }
+    rightState = validateEl(elInputNumber, elInputInfo.Number, PATTERN_NUM, 
+        value => value.length === 12 && value[0] === "+") && rightState;
 
     return rightState;
+}
+
+function validateEl(elInput, value, pattern, rightState = null) {
+    if (value === "" || !pattern.test(value) || (rightState && !rightState(value))) {
+        elInput.classList.add('error');
+        return false;
+    } else {
+        elInput.classList.remove('error');
+        return true;
+    }
 }
 
 function elementDivCreate(data) {
@@ -241,14 +244,7 @@ btnTitle.forEach(el => {
     let isVisible = false;
 
     el.firstChild.addEventListener('click', function () {
-        const children = el.querySelectorAll(':scope > .element__wrap');
-        children.forEach(child => {
-            if (isVisible) {
-                child.classList.add('unvisible');
-            } else {
-                child.classList.remove('unvisible'); 
-            }
-        });
+        setChildVisible(el, isVisible = false)
 
         isVisible = !isVisible;
 
@@ -256,33 +252,46 @@ btnTitle.forEach(el => {
     });
 });
 
+function setChildVisible(el, isVisible) {
+    const child = el.querySelectorAll(':scope > .element__wrap');
+    child.forEach(child => {
+        if (isVisible) {
+            child.classList.add('unvisible');
+        } else {
+            child.classList.remove('unvisible'); 
+        }
+    });
+}
+
 btnAdd.addEventListener('click', function() {
     const elObj = contactObjectCreate();
     console.log(elObj);
 
+    elObjAdd(elObj)
+});
+
+function elObjAdd(elObj) { 
     if (elObj && elObj.Name && elObj.Vacancy && elObj.Number) {
         if (validateCopied(elObj)) {
-            return alert('Dublicate!');
+            alert('Duplicate contact!');
+            return false;
         }
+
         const newDiv = elementDivCreate(elObj);
         const list = getListById(elObj.Name);
         appendToList(list, newDiv);
         checkListValue();
         addItem(elObj);
     }
-});
+}
 
 function validateCopied(elObj) {
     const allEl = document.querySelectorAll(".element__wrap");
 
     for (const el of allEl) {
-        // const name = el.querySelector('p:nth-child(1)').textContent.replace('Name: ', '').trim();
-        // const vacancy = el.querySelector('p:nth-child(2)').textContent.replace('Vacancy: ', '').trim();
-        const number = el.querySelector('p:nth-child(3)').textContent.replace('Number: ', '').trim();
+        const number = elTextContentReplace(el);
 
         if (
-            // name === elObj.Name ||
-            // vacancy === elObj.Vacancy ||
             number === elObj.Number
         ) {
             return true;
@@ -290,6 +299,10 @@ function validateCopied(elObj) {
     }
 
     return false;
+}
+
+function elTextContentReplace(el) {
+    return el.querySelector('p:nth-child(3)').textContent.replace('Number: ', '').trim();
 }
 
 btnTitle.forEach(el => {
