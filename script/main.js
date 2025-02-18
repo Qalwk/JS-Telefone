@@ -6,8 +6,64 @@ const btnClear = document.querySelector('.action__btn-clear');
 const btnTitle = document.querySelectorAll('.list__column-el');
 const listValue = document.querySelectorAll('.value');
 import { PATTERN_ABC, PATTERN_NUM } from './constants.js';
-import { addItem, deleteItem, editItem } from './storage.js';
+// import { addItem, deleteItem, editItem } from './storage.js';
 let contacts = JSON.parse(localStorage.getItem('contacts')) || [];
+
+const initialState = {
+    contacts: JSON.parse(localStorage.getItem('contacts')) || [],
+  };
+  
+  function contactReducer(state = initialState, action) {
+    switch (action.type) {
+      case 'ADD_CONTACT':
+        return { 
+            ...state, 
+            contacts: [...state.contacts, action.payload] 
+        };
+      case 'DELETE_CONTACT':
+        return {
+            ...state,
+            contacts: state.contacts.filter(contact => contact.id !== action.payload),
+        };
+        case 'EDIT_CONTACT':
+            return {
+                ...state,
+                contacts: state.contacts.map(contact =>
+                    contact.id === action.payload.id ? action.payload.updatedContact : contact
+                ),
+            };
+        default:
+            return state;
+    }
+  }
+  
+  const store = Redux.createStore(contactReducer);
+  
+  store.subscribe(() => {
+    const currentState = store.getState();
+    localStorage.setItem('contacts', JSON.stringify(currentState.contacts));
+});
+
+function editContact(id, updatedContact) {
+    store.dispatch({
+        type: 'EDIT_CONTACT',
+        payload: {id, updatedContact},
+    });
+}
+
+function addContact(contact) {
+    store.dispatch({
+        type: 'ADD_CONTACT',
+        payload: contact,
+    });
+}
+
+function deleteContact(id) {
+    store.dispatch({
+        type: 'DELETE_CONTACT',
+        payload: id,
+    });
+}
 
 function checkListValue() {
     btnTitle.forEach(el => { setValue(el); }); 
@@ -176,7 +232,8 @@ function addActionButton(type, newElements, data) {
             
                 document.body.removeChild(editWindow);
                 console.log('Edit ID:', dataId);
-                editItem(dataId, updatedData);
+                // editItem(dataId, updatedData);
+                editContact(dataId, updatedData)
                 location.reload();
 
             });
@@ -184,7 +241,8 @@ function addActionButton(type, newElements, data) {
             button.parentElement.remove();
             checkListValue();
             console.log('Deleting item with ID:', data);
-            deleteItem(dataId);
+            // deleteItem(dataId);
+            deleteContact(dataId)
         }
     });
 
@@ -262,7 +320,8 @@ function elObjAdd(elObj) {
         const list = getListById(elObj.Name);
         appendToList(list, newDiv);
         checkListValue();
-        addItem(elObj);
+        // addItem(elObj);
+        addContact(elObj)
     }
 }
 
